@@ -1,0 +1,34 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display1x1.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "81aa9774-29fc-4460-a633-1a0fa1ff160b"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "FFFFFF",
+         "physicsMaterial" : "Default",
+         "renderable" : "$MOD_DATA/Objects/Renderables/PixelShape.rend",
+         "rotationSet" : "Default",
+         "showInInventory" : false,
+         "uuid" : "031397e3-e039-4b21-89f0-3316baf6ccff"
+      }
+   ]
+}
