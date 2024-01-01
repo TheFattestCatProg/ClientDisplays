@@ -181,13 +181,25 @@ function Display:renderParticialBuffer(buffer)
     local m2 = self.colorBitsMultiplier2
     local pixelBuffer = self.pixelBuffer
 
-    for i = 1, self.resolutionX * self.resolutionY do
-        local color = buffer[i]
-        local bufferColor = pixelBuffer[i]
-        if color ~= nil then
-            bufferColor.r = floor(color.r * m1) * m2 -- optimize somehow
-            bufferColor.g = floor(color.g * m1) * m2
-            bufferColor.b = floor(color.b * m1) * m2
+    if self.colorBits >= 8 then 
+        for i = 1, self.resolutionX * self.resolutionY do
+            local color = buffer[i]
+            local bufferColor = pixelBuffer[i]
+            if color ~= nil then
+                bufferColor.r = color.r
+                bufferColor.g = color.g
+                bufferColor.b = color.b
+            end
+        end
+    else
+        for i = 1, self.resolutionX * self.resolutionY do
+            local color = buffer[i]
+            local bufferColor = pixelBuffer[i]
+            if color ~= nil then
+                bufferColor.r = floor(color.r * m1) * m2
+                bufferColor.g = floor(color.g * m1) * m2
+                bufferColor.b = floor(color.b * m1) * m2
+            end
         end
     end
 end
@@ -199,13 +211,24 @@ function Display:renderFullBuffer(buffer)
     local m2 = self.colorBitsMultiplier2
     local pixelBuffer = self.pixelBuffer
 
-    for i = 1, self.resolutionX * self.resolutionY do
-        local color = buffer[i]
-        local bufferColor = pixelBuffer[i]
-
-        bufferColor.r = floor(color.r * m1) * m2
-        bufferColor.g = floor(color.g * m1) * m2
-        bufferColor.b = floor(color.b * m1) * m2
+    if self.colorBits >= 8 then
+        for i = 1, self.resolutionX * self.resolutionY do
+            local color = buffer[i]
+            local bufferColor = pixelBuffer[i]
+    
+            bufferColor.r = color.r
+            bufferColor.g = color.g
+            bufferColor.b = color.b
+        end
+    else 
+        for i = 1, self.resolutionX * self.resolutionY do
+            local color = buffer[i]
+            local bufferColor = pixelBuffer[i]
+    
+            bufferColor.r = floor(color.r * m1) * m2
+            bufferColor.g = floor(color.g * m1) * m2
+            bufferColor.b = floor(color.b * m1) * m2
+        end
     end
 end
 
