@@ -340,7 +340,6 @@ function Display:client_onCreate()
     local ratioX = boundingBox.z
     local ratioY = boundingBox.y
 
-    print("BEDA")
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
     self.DISPLAY_OFFSET_X = -0.117
