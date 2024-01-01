@@ -3,6 +3,8 @@ CCD_CONFIG_LOADED = true
 
 sm.interactable.connectionType.video = sm.interactable.connectionType.video or 2097152
 
+CCD_API_DISPLAYS = {}
+
 ---@class DisplayResolution
 local DisplayResolution = {}
 

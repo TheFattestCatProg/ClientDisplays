@@ -31,10 +31,8 @@ function Display:initPixelBuffer()
     local colNew = sm.color.new
 
     self.pixelBuffer = {}
-    self.quadTreeSizes = {}
     for i = 1, self.resolutionX * self.resolutionY do
         self.pixelBuffer[i] = colNew(0x000000ff)
-        self.quadTreeSizes[i] = 1
     end
 end
 
@@ -356,6 +354,12 @@ function Display:client_onCreate()
     ---@type Effect[]
     self.effectBufferOld = {}
     self.effectBufferOldSize = 0
+
+    CCD_API_DISPLAYS[self.interactable:getId()] = self:getApi()
+end
+
+function Display:client_onDestroy()
+    CCD_API_DISPLAYS[self.interactable:getId()] = nil
 end
 
 function Display:client_onFixedUpdate()
