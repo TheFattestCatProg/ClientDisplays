@@ -14,12 +14,19 @@ DisplayResolution.y = nil
 
 
 ---@class DisplayApi
-local DisplayApi = class()
+DisplayApi = class()
 
 ---Link to current display class
 ---@private
 ---@type Display
 DisplayApi.display = {}
+
+---@param display Display
+function DisplayApi.new(display)
+    local api = DisplayApi()
+    api.display = display
+    return api
+end
 
 ---Gives the resolution of display
 ---@return DisplayResolution

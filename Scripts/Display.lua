@@ -23,7 +23,7 @@ Display.DISPLAY_FORWARD = sm.vec3.new(1, 0, 0)
 
 ---@return DisplayApi
 function Display:getApi()
-    return DisplayApi({display = self})
+    return DisplayApi.new(self)
 end
 
 ---This function must be called always when resolution has changed.
@@ -331,10 +331,10 @@ function Display:client_onCreate()
     ---@type Color[]
     self.pixelBuffer = {}
 
-    self:changeResolution(128, 128)
+    self:changeResolution(32, 32)
 
     self.pixelSize = 0
-    self:setPixelScale(32 / 128)
+    self:setPixelScale(32 / 32)
 
     self.colorBits = 8
     self.colorBitsMultiplier1 = 0
