@@ -17,7 +17,7 @@ Display.interactable = {}
 Display.shape = {}
 
 Display.PIXEL_SHAPE_UUID = sm.uuid.new("031397e3-e039-4b21-89f0-3316baf6ccff")
-Display.PIXEL_SCALE = 0.0072
+Display.PIXEL_SCALE = 0.000225
 Display.RENDER_DISTANCE = 8
 Display.DISPLAY_FORWARD = sm.vec3.new(1, 0, 0)
 
@@ -69,6 +69,7 @@ end
 ---@param zIndex integer
 ---@param isParticial boolean
 function Display:appendToRenderQueue(buffer, zIndex, isParticial)
+    if not self.effectsShowing then return end -- if some dude wants to force append buffer without render callback
     if not self.renderQueue[zIndex] then
         self.renderQueue[zIndex] = {}
     end
@@ -358,6 +359,10 @@ function Display:recursiveQuadTraversal(posX, posY, quadSize) --quadSize >= 1
 end
 
 function Display:client_onCreate()
+    local boundingBox = self.shape:getBoundingBox() * 4 * 32
+    local ratioX = boundingBox.y
+    local ratioY = boundingBox.z
+
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
     self.DISPLAY_OFFSET_X = -0.117
@@ -374,10 +379,10 @@ function Display:client_onCreate()
     ---@type Color[]
     self.pixelBuffer = {}
 
-    self:changeResolution(32, 32)
+    self:changeResolution(ratioX, ratioY)
 
     self.pixelSize = 0
-    self:setPixelScale(32 / 32)
+    self:setPixelScale(math.min(ratioX, ratioY))
 
     self.colorBits = 8
     self.colorBitsMultiplier1 = 0
