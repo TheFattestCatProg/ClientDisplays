@@ -1,0 +1,13 @@
+{
+   "lodList" : [
+      {
+         "mesh" : "$MOD_DATA/Objects/Mesh/display3x3.obj",
+         "subMeshList" : [
+            {
+               "material" : "Dif",
+               "textureList" : [ "", "", "" ]
+            }
+         ]
+      }
+   ]
+}

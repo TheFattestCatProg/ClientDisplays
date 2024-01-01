@@ -360,8 +360,8 @@ end
 
 function Display:client_onCreate()
     local boundingBox = self.shape:getBoundingBox() * 4 * 32
-    local ratioX = boundingBox.y
-    local ratioY = boundingBox.z
+    local ratioX = boundingBox.z
+    local ratioY = boundingBox.y
 
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
@@ -382,7 +382,7 @@ function Display:client_onCreate()
     self:changeResolution(ratioX, ratioY)
 
     self.pixelSize = 0
-    self:setPixelScale(math.min(ratioX, ratioY))
+    self:setPixelScale(32)
 
     self.colorBits = 8
     self.colorBitsMultiplier1 = 0

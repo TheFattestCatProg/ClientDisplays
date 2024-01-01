@@ -29,6 +29,125 @@
          "rotationSet" : "Default",
          "showInInventory" : false,
          "uuid" : "031397e3-e039-4b21-89f0-3316baf6ccff"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 2
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display2x1.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "311fdaca-a184-49e6-9414-e783dd1e82ed"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 2,
+            "z" : 2
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display2x2.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "3ba98ecb-b1d5-46d5-af6a-7d3e74226d39"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 2,
+            "z" : 3
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display3x2.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "cfde603c-9e27-4e3b-94a8-9b3ea78e0599"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 3,
+            "z" : 3
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display3x3.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "8c2f2ec3-95e1-4534-9142-32366699deb0"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 2,
+            "z" : 4
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display4x2.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "5dab457d-6f64-4208-a179-62531651779f"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 3,
+            "z" : 4
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display4x3.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "ea194a3b-7187-4830-914e-d9a28f35608b"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 4,
+            "z" : 4
+         },
+         "color" : "222222",
+         "physicsMaterial" : "Metal",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Display4x4.rend",
+         "rotationSet" : "PropNegY",
+         "scripted" : {
+            "classname" : "Display",
+            "filename" : "$MOD_DATA/Scripts/Display.lua"
+         },
+         "sticky" : "All",
+         "uuid" : "2519cb43-707a-49bb-92ec-e226ec98c674"
       }
    ]
 }
