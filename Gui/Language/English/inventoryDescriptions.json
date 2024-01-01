@@ -22,5 +22,8 @@
    },
    "ea194a3b-7187-4830-914e-d9a28f35608b" : {
       "title" : "Display 4x3"
+   },
+   "e99397c7-f055-45a7-92f2-b6850dc6d072" : {
+      "title" : "Raycast Camera"
    }
 }

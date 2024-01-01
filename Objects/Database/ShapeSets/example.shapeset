@@ -148,6 +148,23 @@
          },
          "sticky" : "All",
          "uuid" : "2519cb43-707a-49bb-92ec-e226ec98c674"
+      },
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 1
+         },
+         "color" : "673ec7",
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$MOD_DATA/Objects/Renderables/Camera.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "RaycastCamera",
+            "filename" : "$MOD_DATA/Scripts/RaycastCamera.lua"
+         },
+         "sticky" : "+X-X+Y-Y-Z",
+         "uuid" : "e99397c7-f055-45a7-92f2-b6850dc6d072"
       }
    ]
 }
