@@ -50,6 +50,7 @@ function Display:changeResolution(x, y)
     self.maxQuadSize = 2 ^ math.ceil(math.log(maxSize, 2)) -- math. there doesn't matter
 
     self:initPixelBuffer()
+    self:emitResolutionEvent()
 end
 
 ---@param s number
@@ -80,20 +81,41 @@ end
 ---@param interactable Interactable
 ---@param callback function
 function Display:addRenderCallback(interactable, callback)
-    self.callbacks[interactable:getId()] = callback
+    self.renderCallbacks[interactable:getId()] = callback
 end
 
 ---@param interactable Interactable
 function Display:removeRenderCallback(interactable)
     local id = interactable:getId()
-    if self.callbacks[id] then
-        self.callbacks[id] = nil
+    if self.renderCallbacks[id] then
+        self.renderCallbacks[id] = nil
+    end
+end
+
+---@param interactable Interactable
+---@param callback function
+function Display:addResolutionCallback(interactable, callback)
+    self.resolutionCallbacks[interactable:getId()] = callback
+end
+
+---@param interactable Interactable
+function Display:removeResolutionCallback(interactable)
+    local id = interactable:getId()
+    if self.resolutionCallbacks[id] then
+        self.resolutionCallbacks[id] = nil
     end
 end
 
 function Display:emitRenderEvent()
     for i, value in ipairs(self.interactable:getParents()) do
-        local value = self.callbacks[value:getId()]
+        local value = self.renderCallbacks[value:getId()]
+        if value then value() end
+    end
+end
+
+function Display:emitResolutionEvent()
+    for i, value in ipairs(self.interactable:getParents()) do
+        local value = self.resolutionCallbacks[value:getId()]
         if value then value() end
     end
 end
@@ -190,11 +212,14 @@ function Display:renderFullBuffer(buffer)
 end
 
 function Display:renderQueueToPixelBuffer()
-    for i, value in ipairs(self.renderQueue) do
-        if value[2] then
-            self:renderParticialBuffer(value[1])
-        else
-            self:renderFullBuffer(value[1])
+    for i, zIndexTable in ipairs(self.renderQueue) do
+        for z, value in ipairs(zIndexTable) do
+            print(value)
+            if value[2] then
+                self:renderParticialBuffer(value[1])
+            else
+                self:renderFullBuffer(value[1])
+            end
         end
     end
 end
@@ -342,7 +367,8 @@ function Display:client_onCreate()
     self.renderQueue = {}
 
     --- could be some trash because game has no event onDisconnect for logic, but it doesn't matter
-    self.callbacks = {}
+    self.renderCallbacks = {}
+    self.resolutionCallbacks = {}
 
     ---@type Effect[]
     self.effectStorage = {}
@@ -355,11 +381,11 @@ function Display:client_onCreate()
     self.effectBufferOld = {}
     self.effectBufferOldSize = 0
 
-    CCD_API_DISPLAYS[self.interactable:getId()] = self:getApi()
+    sm.mod.ccd.displayApi[self.interactable:getId()] = self:getApi()
 end
 
 function Display:client_onDestroy()
-    CCD_API_DISPLAYS[self.interactable:getId()] = nil
+    sm.mod.ccd.displayApi[self.interactable:getId()] = nil
 end
 
 function Display:client_onFixedUpdate()

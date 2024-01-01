@@ -3,7 +3,10 @@ CCD_CONFIG_LOADED = true
 
 sm.interactable.connectionType.video = sm.interactable.connectionType.video or 2097152
 
-CCD_API_DISPLAYS = {}
+sm.mod = sm.mod or {}
+sm.mod.ccd = {
+    displayApi = {}
+}
 
 ---@class DisplayResolution
 local DisplayResolution = {}
@@ -66,4 +69,17 @@ end
 ---@param thisInteractable Interactable
 function DisplayApi:removeRenderCallback(thisInteractable)
     self.display:removeRenderCallback(thisInteractable)
+end
+
+---Calls callback every resolution change event.
+---@param thisInteractable Interactable
+---@param callback function
+function DisplayApi:setResolutionCallback(thisInteractable, callback)
+    self.display:addResolutionCallback(thisInteractable, callback)
+end
+
+---Removes subscription for resolution change events.
+---@param thisInteractable Interactable
+function DisplayApi:removeResolutionCallback(thisInteractable)
+    self.display:removeResolutionCallback(thisInteractable)
 end
