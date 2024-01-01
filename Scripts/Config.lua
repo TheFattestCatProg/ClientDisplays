@@ -57,6 +57,13 @@ function DisplayApi:renderParticialBuffer(buffer, zIndex)
     self.display:appendToRenderQueue(buffer, zIndex, true)
 end
 
+---Gets screen buffer directly. Not to change colors, change only r,g,b directly.
+---Also method doesn't guarantee a stricly defined drawing order, when there are
+---a lot of connected blocks to display. But this method guarantee to draw at -inf z-index.
+function DisplayApi:getBuffer()
+    return self.display.pixelBuffer
+end
+
 ---Calls callback every render event (requests passing buffer).
 ---Its better to put [renderBuffer] call there
 ---@param thisInteractable Interactable

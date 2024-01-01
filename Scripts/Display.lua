@@ -182,25 +182,13 @@ function Display:renderParticialBuffer(buffer)
     local m2 = self.colorBitsMultiplier2
     local pixelBuffer = self.pixelBuffer
 
-    if self.colorBits >= 8 then 
-        for i = 1, self.resolutionX * self.resolutionY do
-            local color = buffer[i]
-            local bufferColor = pixelBuffer[i]
-            if color ~= nil then
-                bufferColor.r = color.r
-                bufferColor.g = color.g
-                bufferColor.b = color.b
-            end
-        end
-    else
-        for i = 1, self.resolutionX * self.resolutionY do
-            local color = buffer[i]
-            local bufferColor = pixelBuffer[i]
-            if color ~= nil then
-                bufferColor.r = floor(color.r * m1) * m2
-                bufferColor.g = floor(color.g * m1) * m2
-                bufferColor.b = floor(color.b * m1) * m2
-            end
+    for i = 1, self.resolutionX * self.resolutionY do
+        local color = buffer[i]
+        local bufferColor = pixelBuffer[i]
+        if color ~= nil then
+            bufferColor.r = floor(color.r * m1) * m2
+            bufferColor.g = floor(color.g * m1) * m2
+            bufferColor.b = floor(color.b * m1) * m2
         end
     end
 end
@@ -212,24 +200,13 @@ function Display:renderFullBuffer(buffer)
     local m2 = self.colorBitsMultiplier2
     local pixelBuffer = self.pixelBuffer
 
-    if self.colorBits >= 8 then
-        for i = 1, self.resolutionX * self.resolutionY do
-            local color = buffer[i]
-            local bufferColor = pixelBuffer[i]
-    
-            bufferColor.r = color.r
-            bufferColor.g = color.g
-            bufferColor.b = color.b
-        end
-    else 
-        for i = 1, self.resolutionX * self.resolutionY do
-            local color = buffer[i]
-            local bufferColor = pixelBuffer[i]
-    
-            bufferColor.r = floor(color.r * m1) * m2
-            bufferColor.g = floor(color.g * m1) * m2
-            bufferColor.b = floor(color.b * m1) * m2
-        end
+    for i = 1, self.resolutionX * self.resolutionY do
+        local color = buffer[i]
+        local bufferColor = pixelBuffer[i]
+
+        bufferColor.r = floor(color.r * m1) * m2
+        bufferColor.g = floor(color.g * m1) * m2
+        bufferColor.b = floor(color.b * m1) * m2
     end
 end
 
@@ -363,6 +340,7 @@ function Display:client_onCreate()
     local ratioX = boundingBox.z
     local ratioY = boundingBox.y
 
+    print("BEDA")
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
     self.DISPLAY_OFFSET_X = -0.117
@@ -379,15 +357,11 @@ function Display:client_onCreate()
     ---@type Color[]
     self.pixelBuffer = {}
 
-    self:changeResolution(ratioX, ratioY)
-
     self.pixelSize = 0
-    self:setPixelScale(32)
 
-    self.colorBits = 8
+    self.colorBits = 5
     self.colorBitsMultiplier1 = 0
     self.colorBitsMultiplier2 = 0
-    self:changeColorBits(self.colorBits)
 
     self.renderQueue = {}
 
@@ -405,6 +379,10 @@ function Display:client_onCreate()
     ---@type Effect[]
     self.effectBufferOld = {}
     self.effectBufferOldSize = 0
+
+    self:changeResolution(ratioX, ratioY)
+    self:setPixelScale(32)
+    self:changeColorBits(self.colorBits)
 
     sm.mod.ccd.displayApi[self.interactable:getId()] = self:getApi()
 end
