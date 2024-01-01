@@ -214,7 +214,6 @@ end
 function Display:renderQueueToPixelBuffer()
     for i, zIndexTable in ipairs(self.renderQueue) do
         for z, value in ipairs(zIndexTable) do
-            print(value)
             if value[2] then
                 self:renderParticialBuffer(value[1])
             else
