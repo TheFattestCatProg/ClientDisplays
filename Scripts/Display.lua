@@ -120,7 +120,13 @@ function Display:needToRender()
 end
 
 function Display:getEffect()
-    local size = self.effectStorageSize
+    local size = self.effectBufferOldSize -- first try get from old buffer
+    if size > 0 then
+        self.effectBufferOldSize = size - 1
+        return self.effectBufferOld[size]
+    end
+
+    size = self.effectStorageSize -- if that buffer empty, get from storage
     if size > 0 then
         self.effectStorageSize = size - 1
         return self.effectStorage[size]
@@ -138,6 +144,15 @@ function Display:ungetEffect(effect)
     local size = self.effectStorageSize + 1
     self.effectStorage[size] = effect
     self.effectStorageSize = size
+end
+
+function Display:swapEffectBuffers()
+    local b = self.effectBuffer
+    self.effectBuffer = self.effectBufferOld
+    self.effectBufferOld = b
+
+    self.effectBufferOldSize = self.effectBufferSize
+    self.effectBufferSize = 0
 end
 
 ---@param buffer Color[]
@@ -217,21 +232,50 @@ function Display:putEffectOnDisplay(posX, posY, quadSize, color)
 
     effect:setParameter("color", color)
 
-    local edn = self.effectsOnDisplayNumber + 1
-    self.effectsOnDisplay[edn] = effect
-    self.effectsOnDisplayNumber = edn
+    local edn = self.effectBufferSize + 1
+    self.effectBuffer[edn] = effect
+    self.effectBufferSize = edn
 end
 
-function Display:clearEffectsOnScreen() -- TODO: at start reuse already rendered effects at then from storage
-    local effects = self.effectsOnDisplay
+function Display:clearEffectBuffer()
+    local effects = self.effectBuffer
 
-    for i = self.effectsOnDisplayNumber, 1, -1 do
+    for i = 1, self.effectBufferSize do
         local effect = effects[i]
         effect:setOffsetPosition(self.ZERO_VECTOR)
         self:ungetEffect(effect)
     end
 
-    self.effectsOnDisplayNumber = 0
+    self.effectBufferSize = 0
+end
+
+function Display:clearEffectBufferOld()
+    local effects = self.effectBufferOld
+
+    for i = 1, self.effectBufferOldSize do
+        local effect = effects[i]
+        effect:setOffsetPosition(self.ZERO_VECTOR)
+        self:ungetEffect(effect)
+    end
+
+    self.effectBufferOldSize = 0
+end
+
+function Display:startEffects()
+    local storage = self.effectStorage
+
+    for i = 1, self.effectStorageSize do
+        storage[i]:start()
+    end
+end
+
+function Display:stopEffects()
+    self:clearEffectBuffer()
+    local storage = self.effectStorage
+
+    for i = 1, self.effectStorageSize do
+        storage[i]:stop()
+    end
 end
 
 ---@param posX integer
@@ -270,23 +314,6 @@ function Display:recursiveQuadTraversal(posX, posY, quadSize) --quadSize >= 1
     if c4 ~= nil then self:putEffectOnDisplay(posX2, posY2, halfSize, c4) end
 end
 
-function Display:startEffects()
-    local storage = self.effectStorage
-
-    for i = 1, self.effectStorageSize do
-        storage[i]:start()
-    end
-end
-
-function Display:stopEffects()
-    self:clearEffectsOnScreen()
-    local storage = self.effectStorage
-
-    for i = 1, self.effectStorageSize do
-        storage[i]:stop()
-    end
-end
-
 function Display:client_onCreate()
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
@@ -304,10 +331,10 @@ function Display:client_onCreate()
     ---@type Color[]
     self.pixelBuffer = {}
 
-    self:changeResolution(32, 32)
+    self:changeResolution(128, 128)
 
     self.pixelSize = 0
-    self:setPixelScale(32 / 32)
+    self:setPixelScale(32 / 128)
 
     self.colorBits = 8
     self.colorBitsMultiplier1 = 0
@@ -324,8 +351,11 @@ function Display:client_onCreate()
     self.effectStorageSize = 0
 
     ---@type Effect[]
-    self.effectsOnDisplay = {}
-    self.effectsOnDisplayNumber = 0
+    self.effectBuffer = {} -- effects on display
+    self.effectBufferSize = 0
+    ---@type Effect[]
+    self.effectBufferOld = {}
+    self.effectBufferOldSize = 0
 end
 
 function Display:client_onFixedUpdate()
@@ -344,16 +374,17 @@ function Display:client_onFixedUpdate()
 
     self:emitRenderEvent()
     self:renderQueueToPixelBuffer()
+    self.renderQueue = {}
 end
 
 function Display:client_onUpdate()
     if not self.effectsShowing then return end
-    self:clearEffectsOnScreen()
 
+    self:swapEffectBuffers()
     local color = self:recursiveQuadTraversal(0, 0, self.maxQuadSize)
     if color ~= nil then
         self:putEffectOnDisplay(0, 0, self.maxQuadSize, color)
     end
 
-    self.renderQueue = {}
+    self:clearEffectBufferOld()
 end
