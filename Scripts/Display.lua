@@ -124,10 +124,9 @@ end
 ---@return boolean
 function Display:needToRender()
     local displayForward = self.shape.worldRotation * self.DISPLAY_FORWARD
-    local character = sm.localPlayer.getPlayer().character
-    if not character then return false end
+    local cameraPosition = sm.camera.getPosition()
 
-    local posDelta = self.shape.worldPosition - character.worldPosition
+    local posDelta = self.shape.worldPosition - cameraPosition
     local distance = posDelta:length()
     if distance > self.RENDER_DISTANCE then return false end
 
@@ -135,7 +134,6 @@ function Display:needToRender()
     if displayForward:dot(posDelta) <= 0 then return false end
 
     -- TODO: if player cannot see display
-
     return true
 end
 
