@@ -16,10 +16,23 @@ Display.interactable = {}
 ---@type Shape
 Display.shape = {}
 
+---@type Network
+Display.network = {}
+
+---@type Storage
+Display.storage = {}
+
 Display.PIXEL_SHAPE_UUID = sm.uuid.new("031397e3-e039-4b21-89f0-3316baf6ccff")
-Display.PIXEL_SCALE = 0.000225
+Display.PIXEL_SCALE = 0.0072
 Display.RENDER_DISTANCE = 8
 Display.DISPLAY_FORWARD = sm.vec3.new(1, 0, 0)
+Display.GUI_LAYOUT = "$CONTENT_DATA/Gui/Layouts/Display.layout"
+
+Display.COLOR_BITS_MIN = 1
+Display.COLOR_BITS_MAX = 8
+
+Display.MIN_RESOLUTION = 16
+Display.RESOLUTION_STEP = 16
 
 ---@return DisplayApi
 function Display:getApi()
@@ -335,15 +348,111 @@ function Display:recursiveQuadTraversal(posX, posY, quadSize) --quadSize >= 1
     if c4 ~= nil then self:putEffectOnDisplay(posX2, posY2, halfSize, c4) end
 end
 
+function Display:bindApi()
+    sm.mod.ccd.displayApi[self.interactable:getId()] = self:getApi()
+end
+
+function Display:unbindApi()
+    sm.mod.ccd.displayApi[self.interactable:getId()] = nil
+end
+
+function Display:createGui()
+    self.gui = sm.gui.createGuiFromLayout(self.GUI_LAYOUT, false, { backgroundAlpha = 0.5 })
+    self.gui:setButtonCallback("DoneButton", "guiCallback_Done")
+    self.gui:setButtonCallback("CloseButton", "guiCallback_Close")
+
+    self.gui:setButtonCallback("CB_left", "guiCallback_CBLeft")
+    self.gui:setButtonCallback("CB_right", "guiCallback_CBRight")
+    self.gui:setButtonCallback("DR_left", "guiCallback_DRLeft")
+    self.gui:setButtonCallback("DR_right", "guiCallback_DRRight")
+end
+
+function Display:guiOpen()
+    self.gui:setText("CB_value", tostring(self.colorBits))
+    self.gui:setText("DR_value", table.concat({self.resolutionX, self.resolutionY}, 'x'))
+
+    self.guiState.colorBits = self.colorBits
+    self.guiState.resolutionX = self.resolutionX
+    self.guiState.resolutionY = self.resolutionY
+
+    self.gui:open()
+end
+
+function Display:destroyGui()
+    self.gui:destroy()
+end
+
+function Display:guiCallback_Done()
+    self.network:sendToServer("sv_changeState", self.guiState)
+    self.gui:close()
+end
+
+function Display:guiCallback_Close()
+    self.gui:close()
+end
+
+function Display:guiCallback_CBLeft()
+    local newColorBits = math.max(self.guiState.colorBits - 1, self.COLOR_BITS_MIN)
+
+    self.gui:setText("CB_value", tostring(newColorBits))
+    self.guiState.colorBits = newColorBits
+end
+
+function Display:guiCallback_CBRight()
+    local newColorBits = math.min(self.guiState.colorBits + 1, self.COLOR_BITS_MAX)
+
+    self.gui:setText("CB_value", tostring(newColorBits))
+    self.guiState.colorBits = newColorBits
+end
+
+function Display:guiCallback_DRLeft()
+    local rX = self.guiState.resolutionX
+    local rY = self.guiState.resolutionY
+
+    if rX < rY then
+        local ratio = rY / rX
+        rX = math.max(rX - self.RESOLUTION_STEP, self.MIN_RESOLUTION)
+        rY = rX * ratio
+    else
+        local ratio = rX / rY
+        rY = math.max(rY - self.RESOLUTION_STEP, self.MIN_RESOLUTION)
+        rX = rY * ratio
+    end
+
+    self.gui:setText("DR_value", table.concat({rX, rY}, 'x'))
+    self.guiState.resolutionX = rX
+    self.guiState.resolutionY = rY
+end
+
+function Display:guiCallback_DRRight()
+    local rX = self.guiState.resolutionX
+    local rY = self.guiState.resolutionY
+
+    if rX < rY then
+        local ratio = rY / rX
+        rX = math.min(rX + self.RESOLUTION_STEP, self.maxResolutionX)
+        rY = rX * ratio
+    else
+        local ratio = rX / rY
+        rY = math.min(rY + self.RESOLUTION_STEP, self.maxResolutionY)
+        rX = rY * ratio
+    end
+
+    self.gui:setText("DR_value", table.concat({rX, rY}, 'x'))
+    self.guiState.resolutionX = rX
+    self.guiState.resolutionY = rY
+end
+
 function Display:client_onCreate()
     local boundingBox = self.shape:getBoundingBox() * 4 * 32
-    local ratioX = boundingBox.z
-    local ratioY = boundingBox.y
 
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
     self.DISPLAY_OFFSET_X = -0.117
     self.bufferVector = sm.vec3.zero()
+
+    self.maxResolutionX = boundingBox.z
+    self.maxResolutionY = boundingBox.y
 
     self.resolutionX = 0
     self.resolutionXHalf = 0
@@ -379,15 +488,23 @@ function Display:client_onCreate()
     self.effectBufferOld = {}
     self.effectBufferOldSize = 0
 
-    self:changeResolution(ratioX, ratioY)
-    self:setPixelScale(32)
-    self:changeColorBits(self.colorBits)
+    self.gui = nil
+    self.guiState = {
+        colorBits = self.colorBits,
+        resolutionX = self.maxResolutionX,
+        resolutionY = self.maxResolutionY
+    }
 
-    sm.mod.ccd.displayApi[self.interactable:getId()] = self:getApi()
+    self:changeResolution(self.maxResolutionX, self.maxResolutionY)
+    self:setPixelScale(1)
+    self:changeColorBits(self.colorBits)
+    self:createGui()
+    self:bindApi()
 end
 
 function Display:client_onDestroy()
-    sm.mod.ccd.displayApi[self.interactable:getId()] = nil
+    self:destroyGui()
+    self:unbindApi()
 end
 
 function Display:client_onFixedUpdate()
@@ -419,4 +536,36 @@ function Display:client_onUpdate()
     end
 
     self:clearEffectBufferOld()
+end
+
+function Display:client_onInteract(char, state)
+    if state then
+        self:guiOpen()
+    end
+end
+
+function Display:client_onClientDataUpdate(state, channel)
+    local rX = state.resolutionX
+    local rY = state.resolutionY
+    local colorBits = state.colorBits
+
+    if self.resolutionX ~= rX then
+        self:changeResolution(rX, rY)
+        self:setPixelScale(self.maxResolutionX / rX)
+    end
+    if self.colorBits ~= colorBits then
+        self:changeColorBits(colorBits)
+    end
+end
+
+function Display:server_onCreate()
+    local state = self.storage:load()
+    if state then
+        self.network:setClientData(state)
+    end
+end
+
+function Display:sv_changeState(state)
+    self.network:setClientData(state)
+    self.storage:save(state)
 end

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="PanelEmpty" position_real="0.347917 0.34537 0.298438 0.29537" align="Center">
+        <Widget type="Widget" skin="BackgroundPopup" position_real="0 0 1 1" align="Stretch">
+            <Widget type="TextBox" skin="TextBox" position_real="0 0.0250784 1 0.137931" align="HStretch Top" name="Title">
+                <Property key="Caption" value="DISPLAY SETTINGS"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="FontName" value="SM_HeaderLarge_Wide"/>
+                <Property key="TextShadow" value="true"/>
+            </Widget>
+            <Widget type="Button" skin="PrimaryButton" position_real="0.642234 0.808777 0.303665 0.147335" align="Right Bottom" name="DoneButton">
+                <Property key="Caption" value="DONE"/>
+                <Property key="FontName" value="SM_Button"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+            <Widget type="Button" skin="PrimaryButton" position_real="0.0488656 0.808777 0.303665 0.147335" align="Left Bottom" name="CloseButton">
+                <Property key="Caption" value="CLOSE"/>
+                <Property key="FontName" value="SM_Button"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+            <Widget type="Widget" skin="PanelEmpty" position_real="0.04363 0.213166 0.91274 0.166144" align="HStretch Top" name="Param1">
+                <Widget type="TextBox" skin="TextBox" position_real="0 0 0.439771 1" align="Left VCenter">
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <Property key="Caption" value="Color bits (per chnl):"/>
+                    <Property key="FontName" value="SM_Button"/>
+                </Widget>
+                <Widget type="Widget" skin="PanelEmpty" position_real="0.564054 0 0.434034 1" align="Right VCenter">
+                    <Widget type="Button" skin="DressbotArrowLeft" position_real="0.00440529 0.283019 0.101322 0.433962" align="Left VCenter" name="CB_left"/>
+                    <Widget type="Button" skin="DressbotArrowRight" position_real="0.894273 0.283019 0.101322 0.433962" align="Right VCenter" name="CB_right"/>
+                    <Widget type="TextBox" skin="TextBox" position_real="0.110132 0.188679 0.77533 0.622642" align="HStretch VCenter" name="CB_value">
+                        <Property key="Caption" value="!DEFAULT_VAL!"/>
+                        <Property key="TextAlign" value="Center"/>
+                        <Property key="FontName" value="SM_Button"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="PanelEmpty" position_real="0.04363 0.432602 0.91274 0.166144" align="HStretch Top" name="Param2">
+                <Widget type="TextBox" skin="TextBox" position_real="0 0 0.439771 1" align="Left VCenter">
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <Property key="Caption" value="Display resolution:"/>
+                    <Property key="FontName" value="SM_Button"/>
+                </Widget>
+                <Widget type="Widget" skin="PanelEmpty" position_real="0.564054 0 0.434034 1" align="Right VCenter">
+                    <Widget type="Button" skin="DressbotArrowLeft" position_real="0.00440529 0.283019 0.101322 0.433962" align="Left VCenter" name="DR_left"/>
+                    <Widget type="Button" skin="DressbotArrowRight" position_real="0.894273 0.283019 0.101322 0.433962" align="Right VCenter" name="DR_right"/>
+                    <Widget type="TextBox" skin="TextBox" position_real="0.110132 0.188679 0.77533 0.622642" align="HStretch VCenter" name="DR_value">
+                        <Property key="Caption" value="!DEFAULT_VAL!"/>
+                        <Property key="TextAlign" value="Center"/>
+                        <Property key="FontName" value="SM_Button"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings>
+        <Property key="IncludeDirectory" value=""/>
+        <Property key="PanelName" value=""/>
+        <Property key="PanelNamespace" value=""/>
+        <Property key="SourceDirectory" value=""/>
+    </CodeGeneratorSettings>
+</MyGUI>
