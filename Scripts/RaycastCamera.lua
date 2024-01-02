@@ -46,6 +46,8 @@ function RaycastCamera:initResolutionAndBuffers()
 end
 
 function RaycastCamera:renderToBuffer()
+    if not self.interactable.active then return end
+    
     local rX = self.resolutionX
     local rY = self.resolutionY
     local mxPixels = rX * rY
@@ -165,5 +167,19 @@ function RaycastCamera:client_onFixedUpdate()
     elseif self.connectedDisplayId ~= -1 then
         self:onDisplayDisconnected()
         self.connectedDisplayId = -1
+    end
+end
+
+function RaycastCamera:server_onFixedUpdate()
+    local interactable = self.interactable
+    local active = false
+    for i, value in ipairs(interactable:getParents(sm.interactable.connectionType.logic)) do
+        if value.active then 
+            active = true
+            break
+        end
+    end
+    if interactable.active ~= active then
+        interactable.active = active
     end
 end

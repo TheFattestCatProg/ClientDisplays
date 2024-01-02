@@ -297,21 +297,20 @@ function Display:clearEffectBufferOld()
     self.effectBufferOldSize = 0
 end
 
-function Display:startEffects()
-    local storage = self.effectStorage
-
-    for i = 1, self.effectStorageSize do
-        storage[i]:start()
-    end
-end
-
-function Display:stopEffects()
+function Display:destroyEffects()
     self:clearEffectBuffer()
-    local storage = self.effectStorage
+    self:clearEffectBufferOld()
 
+    local storage = self.effectStorage
     for i = 1, self.effectStorageSize do
-        storage[i]:stop()
+        storage[i]:destroy()
     end
+
+    self.effectBuffer = {}
+    self.effectBufferOld = {}
+    self.effectStorage = {}
+
+    self.effectStorageSize = 0
 end
 
 ---@param posX integer
@@ -517,13 +516,12 @@ end
 function Display:client_onFixedUpdate()
     if not self:needToRender() then
         if self.effectsShowing then
-            self:stopEffects()
+            self:destroyEffects()
             self.effectsShowing = false
         end
         return
     else
         if not self.effectsShowing then
-            self:startEffects()
             self.effectsShowing = true
         end
     end
