@@ -73,7 +73,7 @@ function RaycastCamera:renderToBuffer()
     local step =  math.min(self.pixelsAtFrame, mxPixels)
 
     for i = 1, step do
-        local iPx = (px + i - 1) % mxPixels + 1
+        local iPx = (px + i - 1) % mxPixels
         local x = iPx % rX + hX
         local y = floor(iPx / rX) + hY
 
