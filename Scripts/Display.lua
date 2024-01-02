@@ -5,7 +5,7 @@ Display = class()
 
 Display.maxParentCount = -1
 Display.maxChildCount = 0
-Display.connectionInput = sm.interactable.connectionType.video
+Display.connectionInput = sm.interactable.connectionType.video + sm.interactable.connectionType.logic
 Display.connectionOutput = sm.interactable.connectionType.none
 Display.colorNormal = sm.color.new(0x673ec7ff)
 Display.colorHighlight = sm.color.new(0x845ae6ff)
@@ -121,14 +121,14 @@ function Display:removeResolutionCallback(interactable)
 end
 
 function Display:emitRenderEvent()
-    for i, value in ipairs(self.interactable:getParents()) do
+    for i, value in ipairs(self.interactable:getParents(sm.interactable.connectionType.video)) do
         local value = self.renderCallbacks[value:getId()]
         if value then value() end
     end
 end
 
 function Display:emitResolutionEvent()
-    for i, value in ipairs(self.interactable:getParents()) do
+    for i, value in ipairs(self.interactable:getParents(sm.interactable.connectionType.video)) do
         local value = self.resolutionCallbacks[value:getId()]
         if value then value() end
     end
@@ -137,6 +137,8 @@ end
 ---Checks if there some conditions to render image
 ---@return boolean
 function Display:needToRender()
+    if not self.interactable.active then return false end
+
     local displayForward = self.shape.worldRotation * self.DISPLAY_FORWARD
     local cameraPosition = sm.camera.getPosition()
 
@@ -445,20 +447,25 @@ end
 
 function Display:client_onCreate()
     local boundingBox = self.shape:getBoundingBox() * 4 * 32
+    local currentResolutionX = boundingBox.z
+    local currentResolutionY = boundingBox.y
+
+    local mxResolutionScaler = 2
 
     -- for speed optimization:
     self.ZERO_VECTOR = sm.vec3.zero()
     self.DISPLAY_OFFSET_X = -0.117
     self.bufferVector = sm.vec3.zero()
 
-    self.maxResolutionX = boundingBox.z
-    self.maxResolutionY = boundingBox.y
+    self.maxResolutionX = currentResolutionX * mxResolutionScaler
+    self.maxResolutionY = currentResolutionY * mxResolutionScaler
 
     self.resolutionX = 0
     self.resolutionXHalf = 0
     self.resolutionY = 0
     self.resolutionYHalf = 0
     self.maxQuadSize = 0
+    self.maxResolutionScaler = mxResolutionScaler
 
     self.effectsShowing = false
 
@@ -491,11 +498,11 @@ function Display:client_onCreate()
     self.gui = nil
     self.guiState = {
         colorBits = self.colorBits,
-        resolutionX = self.maxResolutionX,
-        resolutionY = self.maxResolutionY
+        resolutionX = currentResolutionY,
+        resolutionY = currentResolutionY
     }
 
-    self:changeResolution(self.maxResolutionX, self.maxResolutionY)
+    self:changeResolution(currentResolutionX, currentResolutionY)
     self:setPixelScale(1)
     self:changeColorBits(self.colorBits)
     self:createGui()
@@ -551,7 +558,7 @@ function Display:client_onClientDataUpdate(state, channel)
 
     if self.resolutionX ~= rX then
         self:changeResolution(rX, rY)
-        self:setPixelScale(self.maxResolutionX / rX)
+        self:setPixelScale(self.maxResolutionX / rX / self.maxResolutionScaler)
     end
     if self.colorBits ~= colorBits then
         self:changeColorBits(colorBits)
@@ -562,6 +569,20 @@ function Display:server_onCreate()
     local state = self.storage:load()
     if state then
         self.network:setClientData(state)
+    end
+end
+
+function Display:server_onFixedUpdate()
+    local interactable = self.interactable
+    local active = false
+    for i, value in ipairs(interactable:getParents(sm.interactable.connectionType.logic)) do
+        if value.active then 
+            active = true
+            break
+        end
+    end
+    if interactable.active ~= active then
+        interactable.active = active
     end
 end
 
