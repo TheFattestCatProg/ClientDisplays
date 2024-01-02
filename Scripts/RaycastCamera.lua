@@ -9,11 +9,19 @@ RaycastCamera.connectionOutput = sm.interactable.connectionType.video
 RaycastCamera.colorNormal = sm.color.new(0x673ec7ff)
 RaycastCamera.colorHighlight = sm.color.new(0x845ae6ff)
 
+RaycastCamera.GUI_LAYOUT = "$CONTENT_DATA/Gui/Layouts/RaycastCamera.layout"
+
 ---@type Interactable
 RaycastCamera.interactable = {}
 
 ---@type Shape
 RaycastCamera.shape = {}
+
+---@type Network
+RaycastCamera.network = {}
+
+---@type Storage
+RaycastCamera.storage = {}
 
 ---@param fov number number in 180deg range
 function RaycastCamera:changeFov(fov)
@@ -25,12 +33,25 @@ function RaycastCamera:initResolutionAndBuffers()
     self.resolutionX = resolution.x
     self.resolutionY = resolution.y
 
-    self.rayBuffer = {}
     self.pixelBuffer = {}
-    local rayBuffer = self.rayBuffer
     local pixelBuffer = self.pixelBuffer
 
-    for i = 1, math.min(self.resolutionX * self.resolutionY, self.pixelsAtFrame) do
+    local black = sm.color.new(0x000000ff)
+
+    for i = 1, self.resolutionX * self.resolutionY do
+        pixelBuffer[i] = black
+    end
+
+    self:changePixelsPerFrame(self.pixelsPerFrame)
+end
+
+
+---@param value integer
+function RaycastCamera:changePixelsPerFrame(value)
+    self.rayBuffer = {}
+    local rayBuffer = self.rayBuffer
+
+    for i = 1, math.min(self.resolutionX * self.resolutionY, value) do
         rayBuffer[i] = {
             type = "ray",
             startPoint = 0,
@@ -38,16 +59,12 @@ function RaycastCamera:initResolutionAndBuffers()
         }
     end
 
-    local black = sm.color.new(0x000000ff)
-
-    for i = 1, self.resolutionX * self.resolutionY do
-        pixelBuffer[i] = black
-    end
+    self.pixelsPerFrame = value
 end
 
 function RaycastCamera:renderToBuffer()
     if not self.interactable.active then return end
-    
+
     local rX = self.resolutionX
     local rY = self.resolutionY
     local mxPixels = rX * rY
@@ -58,7 +75,7 @@ function RaycastCamera:renderToBuffer()
 
     local position = self.shape.worldPosition
     local rotation = self.shape.worldRotation
-    local fovDistance = 1 * self.distance -- TODO: convert from ged to this fov
+    local fovMultiplier = 2 * math.tan(self.fov / 360 * math.pi) * self.distance -- TODO: convert from ged to this fov
 
     local bufferV = sm.vec3.new(0, 0, self.distance)
 
@@ -68,19 +85,19 @@ function RaycastCamera:renderToBuffer()
     local hY = (rMax - rY) * 0.5
 
     local px = self.nextPixel
-    self.nextPixel = (px + self.pixelsAtFrame) % mxPixels
+    self.nextPixel = (px + self.pixelsPerFrame) % mxPixels
 
     local floor = math.floor
 
-    local step =  math.min(self.pixelsAtFrame, mxPixels)
+    local step =  math.min(self.pixelsPerFrame, mxPixels)
 
     for i = 1, step do
         local iPx = (px + i - 1) % mxPixels
         local x = iPx % rX + hX
         local y = floor(iPx / rX) + hY
 
-        bufferV.x = (0.5 - x / rMax) * fovDistance
-        bufferV.y = (0.5 - y / rMax) * fovDistance
+        bufferV.x = (0.5 - x / rMax) * fovMultiplier
+        bufferV.y = (0.5 - y / rMax) * fovMultiplier
 
         local rayDatum = rayBuffer[i]
         rayDatum.startPoint = position
@@ -139,6 +156,58 @@ function RaycastCamera:onDisplayDisconnected()
     self.api = nil
 end
 
+function RaycastCamera:createGui()
+    self.gui = sm.gui.createGuiFromLayout(self.GUI_LAYOUT, false, { backgroundAlpha = 0.5 })
+
+    self.gui:setButtonCallback("DoneButton", "guiCallback_Done")
+    self.gui:setButtonCallback("CloseButton", "guiCallback_Close")
+end
+
+function RaycastCamera:openGui()
+    if not self.gui then
+        self:createGui()
+    end
+
+    self.gui:setText("FV_value", tostring(self.fov))
+    self.gui:setText("PF_value", tostring(self.pixelsPerFrame))
+    self.gui:setText("D_value", tostring(self.distance))
+
+    self.gui:setTextChangedCallback("PF_value", "guiCallback_EditBox_Changed")
+    self.gui:setTextChangedCallback("FV_value", "guiCallback_EditBox_Changed")
+    self.gui:setTextChangedCallback("D_value", "guiCallback_EditBox_Changed")
+
+    self.guiState.fov = self.fov
+    self.guiState.distance = self.distance
+    self.guiState.pixelsPerFrame = self.pixelsPerFrame
+
+    self.gui:open()
+end
+
+function RaycastCamera:guiCallback_Done()
+    self.network:sendToServer("sv_changeState", self.guiState)
+    self.gui:close()
+end
+
+function RaycastCamera:guiCallback_Close()
+    self.gui:close()
+end
+
+function RaycastCamera:guiCallback_EditBox_Changed(wName, text)
+    local n = tonumber(text)
+    local guiState = self.guiState
+
+    if wName == "PF_value" then
+        if not n or n < 1 then return end
+        n = math.floor(n)
+        guiState.pixelsPerFrame = n
+    elseif wName == "FV_value" then
+        if not n or n <= 0 or n > 150 then return end
+        guiState.fov = n
+    elseif wName == "D_value" then
+        guiState.distance = n or guiState.distance
+    end
+end
+
 function RaycastCamera:client_onCreate()
     self.fov = 90
     self.distance = 50
@@ -149,11 +218,18 @@ function RaycastCamera:client_onCreate()
     self.rayBuffer = {}
     self.pixelBuffer = {}
 
-    self.pixelsAtFrame = 1024
+    self.pixelsPerFrame = 1024
     self.nextPixel = 0
 
     ---@type DisplayApi|nil
     self.api = nil
+
+    self.gui = nil
+    self.guiState = {
+        fov = self.fov,
+        pixelsPerFrame = self.pixelsPerFrame,
+        distance = self.distance
+    }
 end
 
 function RaycastCamera:client_onFixedUpdate()
@@ -170,6 +246,28 @@ function RaycastCamera:client_onFixedUpdate()
     end
 end
 
+function RaycastCamera:client_onInteract(char, state)
+    if state then
+        self:openGui()
+    end
+end
+
+function RaycastCamera:client_onClientDataUpdate(state, channel)
+    self.fov = state.fov
+    self.distance = state.distance
+
+    if self.pixelsPerFrame ~= state.pixelsPerFrame then
+        self:changePixelsPerFrame(state.pixelsPerFrame)
+    end
+end
+
+function RaycastCamera:server_onCreate()
+    local state = self.storage:load()
+    if state then
+        self.network:setClientData(state)
+    end
+end
+
 function RaycastCamera:server_onFixedUpdate()
     local interactable = self.interactable
     local active = false
@@ -182,4 +280,9 @@ function RaycastCamera:server_onFixedUpdate()
     if interactable.active ~= active then
         interactable.active = active
     end
+end
+
+function RaycastCamera:sv_changeState(state)
+    self.storage:save(state)
+    self.network:setClientData(state)
 end

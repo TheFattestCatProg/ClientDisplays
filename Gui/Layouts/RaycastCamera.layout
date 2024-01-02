@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="PanelEmpty" position_real="0.347917 0.343519 0.298438 0.293519" align="Center">
+        <Widget type="Widget" skin="BackgroundPopup" position_real="0 0 1 1" align="Stretch">
+            <Widget type="TextBox" skin="TextBox" position_real="0 0.0157729 1 0.129338" align="HStretch Top" name="Title">
+                <Property key="Caption" value="CAMERA SETTINGS"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="FontName" value="SM_HeaderLarge_Wide"/>
+                <Property key="TextShadow" value="true"/>
+            </Widget>
+            <Widget type="Button" skin="PrimaryButton" position_real="0.642234 0.807571 0.303665 0.141956" align="Right Bottom" name="DoneButton">
+                <Property key="Caption" value="DONE"/>
+                <Property key="FontName" value="SM_Button"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+            <Widget type="Button" skin="PrimaryButton" position_real="0.0209424 0.807571 0.303665 0.141956" align="Left Bottom" name="CloseButton">
+                <Property key="Caption" value="CLOSE"/>
+                <Property key="FontName" value="SM_Button"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+            <Widget type="Widget" skin="PanelEmpty" position_real="0.0157068 0.208202 0.91274 0.157729" align="HStretch Top" name="Param1">
+                <Widget type="TextBox" skin="TextBox" position_real="0 0 0.439771 1" align="Left VCenter">
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <Property key="Caption" value="Pixels per frame:"/>
+                    <Property key="FontName" value="SM_Button"/>
+                </Widget>
+                <Widget type="Widget" skin="SearchBarBackground" position_real="0.602294 0.2 0.344168 0.62" align="Right VCenter">
+                    <Widget type="EditBox" skin="EditBoxEmpty" position_real="0.138889 0.0967742 0.711111 0.806452" align="HStretch VCenter" name="PF_value">
+                        <Property key="Caption" value="!DEFAULT_VAL!"/>
+                        <Property key="TextAlign" value="Center"/>
+                        <Property key="FontName" value="SM_Button"/>
+                        <Property key="MultiLine" value="false"/>
+                        <Property key="MaxTextLength" value="4"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="PanelEmpty" position_real="0.0157068 0.37224 0.91274 0.157729" align="HStretch Top" name="Param2">
+                <Widget type="TextBox" skin="TextBox" position_real="0 0 0.439771 1" align="Left VCenter">
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <Property key="Caption" value="FoV:"/>
+                    <Property key="FontName" value="SM_Button"/>
+                </Widget>
+                <Widget type="Widget" skin="SearchBarBackground" position_real="0.602294 0.2 0.344168 0.62" align="Right VCenter">
+                    <Widget type="EditBox" skin="EditBoxEmpty" position_real="0.138889 0.0967742 0.711111 0.806452" align="HStretch VCenter" name="FV_value">
+                        <Property key="Caption" value="!DEFAULT_VAL!"/>
+                        <Property key="TextAlign" value="Center"/>
+                        <Property key="FontName" value="SM_Button"/>
+                        <Property key="MultiLine" value="false"/>
+                        <Property key="MaxTextLength" value="3"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="PanelEmpty" position_real="0.0157068 0.542587 0.91274 0.157729" align="HStretch Top" name="Param3">
+                <Widget type="TextBox" skin="TextBox" position_real="0 0 0.439771 1" align="Left VCenter">
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <Property key="Caption" value="Distance:"/>
+                    <Property key="FontName" value="SM_Button"/>
+                </Widget>
+                <Widget type="Widget" skin="SearchBarBackground" position_real="0.602294 0.2 0.344168 0.62" align="Right VCenter">
+                    <Widget type="EditBox" skin="EditBoxEmpty" position_real="0.138889 0.0967742 0.711111 0.806452" align="HStretch VCenter" name="D_value">
+                        <Property key="Caption" value="!DEFAULT_VAL!"/>
+                        <Property key="TextAlign" value="Center"/>
+                        <Property key="FontName" value="SM_Button"/>
+                        <Property key="MultiLine" value="false"/>
+                        <Property key="MaxTextLength" value="5"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+        </Widget>
+    </Widget>
+    <CodeGeneratorSettings>
+        <Property key="IncludeDirectory" value=""/>
+        <Property key="PanelName" value=""/>
+        <Property key="PanelNamespace" value=""/>
+        <Property key="SourceDirectory" value=""/>
+    </CodeGeneratorSettings>
+</MyGUI>

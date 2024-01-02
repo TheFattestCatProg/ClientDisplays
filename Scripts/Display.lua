@@ -359,6 +359,7 @@ end
 
 function Display:createGui()
     self.gui = sm.gui.createGuiFromLayout(self.GUI_LAYOUT, false, { backgroundAlpha = 0.5 })
+    
     self.gui:setButtonCallback("DoneButton", "guiCallback_Done")
     self.gui:setButtonCallback("CloseButton", "guiCallback_Close")
 
@@ -369,6 +370,10 @@ function Display:createGui()
 end
 
 function Display:guiOpen()
+    if not self.gui then
+        self:createGui()
+    end
+
     self.gui:setText("CB_value", tostring(self.colorBits))
     self.gui:setText("DR_value", table.concat({self.resolutionX, self.resolutionY}, 'x'))
 
@@ -504,12 +509,13 @@ function Display:client_onCreate()
     self:changeResolution(currentResolutionX, currentResolutionY)
     self:setPixelScale(1)
     self:changeColorBits(self.colorBits)
-    self:createGui()
     self:bindApi()
 end
 
 function Display:client_onDestroy()
-    self:destroyGui()
+    if self.gui then
+        self:destroyGui()
+    end
     self:unbindApi()
 end
 
