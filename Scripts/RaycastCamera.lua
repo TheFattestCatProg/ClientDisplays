@@ -117,12 +117,12 @@ function RaycastCamera:renderToBuffer()
                 local dir = info.directionWorld
                 local d = -dir:dot(info.normalWorld)
                 if d > 0 then
-                    pixelBuffer:setColor(iPx, groundColor * exp(-(d / dir:length() - 2) ^ 2))
+                    pixelBuffer[iPx] = groundColor * exp(-(d / dir:length() - 2) ^ 2)
                 else
-                    pixelBuffer:setColor(iPx, nil)
+                    pixelBuffer[iPx] = nil
                 end
             else
-                pixelBuffer:setColor(iPx, nil)
+                pixelBuffer[iPx] = nil
             end
             --[[if shape then
                 pixelBuffer[iPx] = shape.color * (1 - info.fraction)
@@ -130,7 +130,7 @@ function RaycastCamera:renderToBuffer()
                 pixelBuffer[iPx] = groundColor * (1 - info.fraction)
             end]]
         else
-            pixelBuffer:setColor(iPx, nil)
+            pixelBuffer[iPx] = nil
         end
     end
 end
@@ -229,7 +229,7 @@ function RaycastCamera:client_onCreate()
     self.resolutionX = 0
     self.resolutionY = 0
     self.rayBuffer = {}
-    ---@type DrawBuffer
+    ---@type Color[]
     self.drawBuffer = nil
 
     self.pixelsPerFrame = 1024
