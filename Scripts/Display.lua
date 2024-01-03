@@ -323,6 +323,8 @@ function Layer:setResolution(x, y, pixelSize)
     local blocksY = y / LayerBlock.BLOCK_SIZE
     local blocksNo = blocksX * blocksY
 
+    self:destroy()
+
     --self.changedBlocks = {} it is linked in metatable so it cannot be changed
     self.blocks = {}
     local cb = self.changedBlocks

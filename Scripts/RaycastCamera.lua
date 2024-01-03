@@ -153,15 +153,16 @@ function RaycastCamera:onDisplayConnected()
 end
 
 function RaycastCamera:onDisplayDisconnected()
-    self.drawBuffer = nil
     self.rayBuffer = {}
     self.resolutionX = 0
     self.resolutionY = 0
 
     if sm.mod.ccd.displayApi[self.connectedDisplayId] then
+        self.api:destroyBuffer(1)
         self.api:removeRenderCallback(self.interactable)
         self.api:removeResolutionCallback(self.interactable)
     end
+    self.drawBuffer = nil
     self.api = nil
 end
 
@@ -256,6 +257,15 @@ function RaycastCamera:client_onFixedUpdate()
     elseif self.connectedDisplayId ~= -1 then
         self:onDisplayDisconnected()
         self.connectedDisplayId = -1
+    end
+end
+
+function RaycastCamera:client_onDestroy()
+    if self.gui then
+        self.gui:destroy()
+    end
+    if self.api then
+        self.api:destroyBuffer(1)
     end
 end
 
