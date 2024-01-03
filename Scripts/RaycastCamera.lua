@@ -34,13 +34,6 @@ function RaycastCamera:initResolutionAndBuffers()
     self.resolutionY = resolution.y
 
     self.pixelBuffer = {}
-    local pixelBuffer = self.pixelBuffer
-
-    local black = sm.color.new(0x000000ff)
-
-    for i = 1, self.resolutionX * self.resolutionY do
-        pixelBuffer[i] = black
-    end
 
     self:changePixelsPerFrame(self.pixelsPerFrame)
 end
@@ -107,12 +100,12 @@ function RaycastCamera:renderToBuffer()
         rayDatum.endPoint = position + rotation * bufferV
     end
 
-    local pixelBuffer = self.pixelBuffer
+    local pixelBuffer = self.drawBuffer
     local results = sm.physics.multicast(rayBuffer)
     local exp = math.exp
 
     for i = 1, step do
-        local iPx = (px + i - 1) % mxPixels + 1
+        local iPx = (px + i - 1) % mxPixels
 
         local r = results[i]
         local hasCollision = r[1]
@@ -124,12 +117,12 @@ function RaycastCamera:renderToBuffer()
                 local dir = info.directionWorld
                 local d = -dir:dot(info.normalWorld)
                 if d > 0 then
-                    pixelBuffer[iPx] = groundColor * exp(-(d / dir:length() - 2) ^ 2)
+                    pixelBuffer:setColor(iPx, groundColor * exp(-(d / dir:length() - 2) ^ 2))
                 else
-                    pixelBuffer[iPx] = baseColor
+                    pixelBuffer:setColor(iPx, nil)
                 end
             else
-                pixelBuffer[iPx] = baseColor
+                pixelBuffer:setColor(iPx, nil)
             end
             --[[if shape then
                 pixelBuffer[iPx] = shape.color * (1 - info.fraction)
@@ -137,11 +130,9 @@ function RaycastCamera:renderToBuffer()
                 pixelBuffer[iPx] = groundColor * (1 - info.fraction)
             end]]
         else
-            pixelBuffer[iPx] = baseColor
+            pixelBuffer:setColor(iPx, nil)
         end
     end
-
-    self.api:renderFullBuffer(pixelBuffer, 1)
 end
 
 function RaycastCamera:onDisplayConnected()
@@ -149,16 +140,20 @@ function RaycastCamera:onDisplayConnected()
 
     ---@type DisplayApi
     local api = sm.mod.ccd.displayApi[id]
+    local buffer = api:createBuffer(1)
+
+    if not buffer then return end
 
     api:setRenderCallback(self.interactable, function() self:renderToBuffer() end)
     api:setResolutionCallback(self.interactable, function() self:initResolutionAndBuffers() end)
 
     self.api = api
+    self.drawBuffer = buffer
     self:initResolutionAndBuffers()
 end
 
 function RaycastCamera:onDisplayDisconnected()
-    self.pixelBuffer = {}
+    self.drawBuffer = nil
     self.rayBuffer = {}
     self.resolutionX = 0
     self.resolutionY = 0
@@ -233,7 +228,8 @@ function RaycastCamera:client_onCreate()
     self.resolutionX = 0
     self.resolutionY = 0
     self.rayBuffer = {}
-    self.pixelBuffer = {}
+    ---@type DrawBuffer
+    self.drawBuffer = nil
 
     self.pixelsPerFrame = 1024
     self.nextPixel = 0

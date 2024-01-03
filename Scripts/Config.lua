@@ -8,6 +8,127 @@ sm.mod.ccd = {
     displayApi = {}
 }
 
+
+
+---Please use as usual `Color[]` (e.g. `buffer[i] = color`), don't use methods.
+---Transparent color is `nil`. Starts since 1.
+---@class DrawBuffer
+DrawBuffer = class()
+
+---@type function
+DrawBuffer.FLOOR = nil
+---@type function
+DrawBuffer.COL_NEW = nil
+
+---@type Color[]
+DrawBuffer.pool = {}
+
+---@type boolean[]
+DrawBuffer.changedTable = {}
+---@type integer
+DrawBuffer.blockSize = 0
+---@type integer
+DrawBuffer.blocksPerX = 0
+
+---@type integer
+DrawBuffer.bitMode = 0
+
+---@type integer
+DrawBuffer.resolutionX = 0
+---@type integer
+DrawBuffer.resolutionY = 0
+
+---@type number
+DrawBuffer.bitMultiplier1 = 0
+---@type number
+DrawBuffer.bitMultiplier2 = 0
+
+---@param changedTable boolean[]
+---@param pool Color[]
+---@param blockSize integer
+---@return DrawBuffer
+function DrawBuffer.new(changedTable, pool, blockSize)
+    ---@type DrawBuffer
+    local obj = DrawBuffer()
+    obj.pool = pool
+    obj.changedTable = changedTable
+    obj.blockSize = blockSize
+    obj.blocksPerX = 0
+
+    obj.FLOOR = math.floor
+    obj.COL_NEW = sm.color.new
+    
+    return obj
+end
+
+---@param x integer
+---@param y integer
+function DrawBuffer:setResolution(x, y)
+    self.resolutionX = x
+    self.resolutionY = y
+    self.blocksPerX = x / self.blockSize
+end
+
+---@param pxPos integer since 0
+---@param color Color|nil
+function DrawBuffer:setColor(pxPos, color)
+    local index = pxPos + 1
+    local buffer = self.pool
+    local floor = self.FLOOR
+    local m1 = self.bitMultiplier1
+    local m2 = self.bitMultiplier2
+
+    if color then
+        local c = self.COL_NEW(floor(color.r * m1) * m2, floor(color.g * m1) * m2, floor(color.b * m1) * m2)
+
+        if c ~= buffer[index] then
+            self:setChanged(pxPos)
+            buffer[index] = c
+        end
+    else
+        if buffer[index] then
+            self:setChanged(pxPos)
+            buffer[index] = nil
+        end
+    end
+end
+
+---@param pxPos integer since 0
+---@return Color
+function DrawBuffer:getColor(pxPos)
+    return self.pool[pxPos + 1]
+end
+
+---@param pxPos integer
+function DrawBuffer:setChanged(pxPos)
+    local rX = self.resolutionX
+    local blockSize = self.blockSize
+    local floor = self.FLOOR
+
+    local bX = floor(pxPos % rX / blockSize)
+    local bY = floor(pxPos / rX / blockSize)
+
+    self.changedTable[bX + bY * self.blocksPerX + 1] = true
+end
+
+function DrawBuffer:setChangedAll()
+    local t = self.changedTable
+    for i = 1, #t do
+        t[i] = true
+    end
+end
+
+---@param bits integer
+function DrawBuffer:setBitMode(bits)
+    self.bitMode = bits
+    self.bitMultiplier1 = 255 / (2 ^ (8 - bits))
+    self.bitMultiplier2 = 1 / (2 ^ bits - 1)
+
+    self:setChangedAll()
+end
+
+
+
 ---@class DisplayResolution
 local DisplayResolution = {}
 
@@ -16,6 +137,7 @@ DisplayResolution.x = nil
 
 ---@type integer
 DisplayResolution.y = nil
+
 
 
 ---@class DisplayApi
@@ -39,29 +161,19 @@ function DisplayApi:getResolution()
     return { x = self.display.resolutionX, y = self.display.resolutionY }
 end
 
----Renders buffer at given z-index. The buffer must contain all elements.
----Also it's not necessary to constantly create a new buffer when passing to this function.
----Also buffer starts since 1, because lua optimization 💀.
----@param buffer Color[]
----@param zIndex integer
-function DisplayApi:renderFullBuffer(buffer, zIndex)
-    self.display:appendToRenderQueue(buffer, zIndex, false)
+---Creates buffer at z-index, where you need to set colors.
+---If buffer at zIndex is already exists, it returns nil.
+---Color `nil` means transparent.
+---@param zIndex integer z-index >= 1
+---@return DrawBuffer|nil
+function DisplayApi:createBuffer(zIndex)
+    return self.display:createLayer(zIndex)
 end
 
----Renders buffer at given z-index. The buffer doesn't need to contain all elements.
----Also it's not necessary to constantly create a new buffer when passing to this function.
----Also buffer starts since 1, because lua optimization 💀.
----@param buffer Color[]
+---Destroys buffer at z-index
 ---@param zIndex integer
-function DisplayApi:renderParticialBuffer(buffer, zIndex)
-    self.display:appendToRenderQueue(buffer, zIndex, true)
-end
-
----Gets screen buffer directly. Not to change colors, change only r,g,b directly.
----Also method doesn't guarantee a stricly defined drawing order, when there are
----a lot of connected blocks to display. But this method guarantee to draw at -inf z-index.
-function DisplayApi:getBuffer()
-    return self.display.pixelBuffer
+function DisplayApi:destroyBuffer(zIndex)
+    self.display:destroyLayer(zIndex)
 end
 
 ---Calls callback every render event (requests passing buffer).
