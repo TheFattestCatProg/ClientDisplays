@@ -50,12 +50,15 @@ end
 function RaycastCamera:changePixelsPerFrame(value)
     self.rayBuffer = {}
     local rayBuffer = self.rayBuffer
+    local filter = sm.physics.filter
+    local mask = filter.default
 
     for i = 1, math.min(self.resolutionX * self.resolutionY, value) do
         rayBuffer[i] = {
             type = "ray",
             startPoint = 0,
-            endPoint = 0
+            endPoint = 0,
+            mask = mask
         }
     end
 
@@ -106,6 +109,7 @@ function RaycastCamera:renderToBuffer()
 
     local pixelBuffer = self.pixelBuffer
     local results = sm.physics.multicast(rayBuffer)
+    local exp = math.exp
 
     for i = 1, step do
         local iPx = (px + i - 1) % mxPixels + 1
@@ -116,12 +120,22 @@ function RaycastCamera:renderToBuffer()
         local info = r[2]
 
         if hasCollision then
-            local shape = info:getShape()
-            if shape then
+            if info.type ~= "limiter" then
+                local dir = info.directionWorld
+                local d = -dir:dot(info.normalWorld)
+                if d > 0 then
+                    pixelBuffer[iPx] = groundColor * exp(-(d / dir:length() - 2) ^ 2)
+                else
+                    pixelBuffer[iPx] = baseColor
+                end
+            else
+                pixelBuffer[iPx] = baseColor
+            end
+            --[[if shape then
                 pixelBuffer[iPx] = shape.color * (1 - info.fraction)
             else
                 pixelBuffer[iPx] = groundColor * (1 - info.fraction)
-            end
+            end]]
         else
             pixelBuffer[iPx] = baseColor
         end
@@ -196,14 +210,17 @@ function RaycastCamera:guiCallback_EditBox_Changed(wName, text)
     local n = tonumber(text)
     local guiState = self.guiState
 
+    if not n then return end
+
     if wName == "PF_value" then
-        if not n or n < 1 then return end
+        if n < 1 then return end
         n = math.floor(n)
         guiState.pixelsPerFrame = n
     elseif wName == "FV_value" then
-        if not n or n <= 0 or n > 150 then return end
+        if n <= 0 or n > 150 then return end
         guiState.fov = n
     elseif wName == "D_value" then
+        if n <= 0 then return end
         guiState.distance = n or guiState.distance
     end
 end
